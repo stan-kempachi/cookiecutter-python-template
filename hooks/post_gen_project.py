@@ -1,5 +1,8 @@
+import io
+import sys
 from pathlib import Path
 
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding="utf-8")
 
 project_slug = "{{ cookiecutter.project_slug }}"
 package_name = "{{ cookiecutter.package_name }}"
