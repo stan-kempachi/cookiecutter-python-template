@@ -8,5 +8,6 @@
   "use_ruff": ["yes", "no"],
   "use_pytest": ["yes", "no"],
   "use_pre_commit": ["yes", "no"],
-  "python_version": "3.12"
+  "python_version": "3.12",
+  "author": "Anonyme <anonyme@example.com>"
 }
