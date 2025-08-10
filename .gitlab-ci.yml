@@ -1,0 +1,49 @@
+stages:
+  - lint
+  - test
+  - generate-template
+  - cleanup
+
+# Lint Stage
+lint:
+  stage: lint
+  image: "python:3.12"
+  before_script:
+    # Install pre-commit for linting
+    - pip install pre-commit
+  script:
+    # Run all pre-commit hooks
+    - pre-commit run --all-files
+
+# Test Stage
+test:
+  stage: test
+  image: "python:3.12"
+  before_script:
+    # Install pytest and cookiecutter for testing
+    - pip install pytest cookiecutter
+  script:
+    # Run tests to validate the template functionality
+    - pytest tests
+
+# Generate Template Stage
+generate-template:
+  stage: generate-template
+  image: "python:3.12"
+  before_script:
+    # Install requirements for template generation
+    - pip install poetry cookiecutter
+  script:
+    # Generate a project from the template
+    - cookiecutter . --no-input
+    # Validate the generated project configuration (e.g., Poetry TOML file)
+    - cd mon_super_projet && poetry check
+
+# Cleanup Stage
+cleanup:
+  stage: cleanup
+  image: "alpine:latest"
+  script:
+    # Clean up temporary files generated during the pipeline
+    - echo "Cleaning up temporary generated project files."
+    - rm -rf mon_super_projet
