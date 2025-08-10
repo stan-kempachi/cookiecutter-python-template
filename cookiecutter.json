@@ -1,0 +1,12 @@
+{
+  "project_name": "Mon super projet",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_') }}",
+  "package_name": "core",
+  "framework": ["script", "flask", "django"],
+  "use_app_folder": ["yes", "no"],
+  "use_black": ["yes", "no"],
+  "use_ruff": ["yes", "no"],
+  "use_pytest": ["yes", "no"],
+  "use_pre_commit": ["yes", "no"],
+  "python_version": "3.12"
+}

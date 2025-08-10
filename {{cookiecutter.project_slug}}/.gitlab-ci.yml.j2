@@ -1,0 +1,64 @@
+stages:
+  - lint
+  - test
+  - deploy
+
+# Lint stage
+lint:
+  stage: lint
+  image: "python:{{ cookiecutter.python_version }}"
+  before_script:
+    - pip install poetry
+  script:
+    - poetry install
+    {% if cookiecutter.use_black == "yes" %}
+    - poetry run black --check .
+    {% endif %}
+    {% if cookiecutter.use_ruff == "yes" %}
+    - poetry run ruff .
+    {% endif %}
+    {% if cookiecutter.use_black == "yes" %}
+    - poetry run isort --check-only .
+    {% endif %}
+
+# Test stage
+test:
+  stage: test
+  image: "python:{{ cookiecutter.python_version }}"
+  before_script:
+    - pip install poetry
+  script:
+    - poetry install
+    {% if cookiecutter.use_pytest == "yes" %}
+    - poetry run pytest
+    {% else %}
+    - echo "pytest non activé"
+    {% endif %}
+
+# Deploy stage (for android server deployment)
+deploy:
+  stage: deploy
+  image: "alpine:latest"  # Image Alpine légère avec accessibilité à ssh/scp
+  before_script:
+    # Installation de SSH et configuration de la clé privée
+    - apk add --no-cache openssh
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H "$SERVER_SSH_HOST" >> ~/.ssh/known_hosts
+  script:
+    {% if cookiecutter.framework == "flask" %}
+    # Déploiement spécifique Flask
+    - echo "Déploiement Flask sur le serveur ${SERVER_SSH_HOST}"
+    - scp -r . ${SERVER_SSH_USER}@${SERVER_SSH_HOST}:${DEPLOY_PATH}
+    - ssh ${SERVER_SSH_USER}@${SERVER_SSH_HOST} "cd ${DEPLOY_PATH} && docker build -t flask-app . && docker run -d -p 5000:5000 flask-app"
+    {% elif cookiecutter.framework == "django" %}
+    # Déploiement spécifique Django
+    - echo "Déploiement Django sur le serveur ${SERVER_SSH_HOST}"
+    - scp -r . ${SERVER_SSH_USER}@${SERVER_SSH_HOST}:${DEPLOY_PATH}
+    - ssh ${SERVER_SSH_USER}@${SERVER_SSH_HOST} "cd ${DEPLOY_PATH} && docker build -t django-app . && docker run -d -p 8000:8000 django-app"
+    {% else %}
+    - echo "Aucun déploiement requis pour ce framework."
+    {% endif %}
+  only:
+    - main  # Seulement exécuter sur la branche `main`.

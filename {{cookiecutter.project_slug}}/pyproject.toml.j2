@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "{{ cookiecutter.project_slug }}"
+version = "0.1.0"
+description = "Projet généré avec Cookiecutter + Poetry"
+authors = ["Stan Bruyere <stan.adm@gmail.com>"]
+packages = [{ include = "{{ cookiecutter.package_name }}" }]
+
+[tool.poetry.dependencies]
+python = "^{{ cookiecutter.python_version }}"
+{% if cookiecutter.framework == "flask" %}
+flask = "^2.3"
+{% elif cookiecutter.framework == "django" %}
+django = "^4.2"
+{% endif %}
+
+[tool.poetry.dev-dependencies]
+{% if cookiecutter.use_black == "yes" %}
+black = "*"
+isort = "*"
+{% endif %}
+{% if cookiecutter.use_ruff == "yes" %}
+ruff = "*"
+{% endif %}
+{% if cookiecutter.use_pytest == "yes" %}
+pytest = "*"
+{% else %}
+{% endif %}
+{% if cookiecutter.use_pre_commit == "yes" %}
+pre-commit = "*"
+{% endif %}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
