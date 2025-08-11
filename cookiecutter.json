@@ -1,6 +1,6 @@
 {
   "project_name": "Mon super projet",
-  "project_slug": "mon_super_projet",
+  "project_slug": "{{ cookiecutter.project_name|lower|replace(' ', '-') }}",
   "package_name": "core",
   "framework": ["script", "flask", "django"],
   "use_app_folder": ["yes", "no"],
