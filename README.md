@@ -1,4 +1,3 @@
-#%% md
 # Modèle Cookiecutter Python Template
 
 ## Description
