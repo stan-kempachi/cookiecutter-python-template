@@ -12,9 +12,25 @@ Ce projet permet de générer des templates Python adaptables pour divers cas d'
 - Scripts avant/après génération grâce à `pre_gen_project.py`.
 
 ## Structure générée
-Voici un exemple de structure générée :
+Voici un exemple de structure générée par ce template :
 
-#%%
+```text
+.
+├── .gitlab-ci.yml           # Configuration CI/CD pour GitLab
+├── cookiecutter.json        # Fichier de configuration pour votre modèle
+├── pre_gen_project.py       # Script exécuté avant la génération du projet
+├── post_gen_project.py      # Script exécuté après la génération du projet
+├── src/                     # Répertoire contenant le code principal
+│   ├── __init__.py
+│   ├── main.py              # Exemple de script Python principal
+├── tests/                   # Répertoire pour les tests unitaires
+│   ├── __init__.py
+│   ├── test_main.py         # Exemple de fichier de test avec pytest
+├── requirements.txt         # Dépendances Python
+├── README.md                # Documentation principale
+├── setup.py                 # Script d'installation pour votre projet
+└── LICENSE                  # Licence du projet
+```
 
 ## Installation
 ### Prérequis
