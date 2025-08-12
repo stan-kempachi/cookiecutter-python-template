@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding="utf-8")
 
 # Variables contextuelles à partir de Cookiecutter
-project_slug = r"{{ cookiecutter.project_slug }}"  # Fix chemin
+project_slug = "{{ cookiecutter.project_slug.replace('-', '_') }}"
 package_name = r"{{ cookiecutter.package_name }}"  # Fix chemin
 framework = r"{{ cookiecutter.framework }}"  # Fix alternative
 
