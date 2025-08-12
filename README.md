@@ -1,87 +1,110 @@
 # Modèle Cookiecutter Python Template
 
 ## Description
-Ce projet permet de générer des templates Python adaptables pour divers cas d'utilisation (scripts, Django, Flask, etc.) à l'aide de l'outil Cookiecutter. Il propose une structure prédéfinie et intégrée, offrant des bonnes pratiques pour le développement, les tests, l'intégration continue et la personnalisation.
+Ce projet offre une solution clé en main pour générer des templates Python modulaires adaptés à divers cas d'utilisation (scripts, Django, Flask, etc.) grâce à l'outil **Cookiecutter**. Ce modèle fournit une structure préconfigurée basée sur les bonnes pratiques en matière de développement, tests, intégration continue et personnalisation. La gestion des dépendances est simplifiée grâce à **Poetry**, garantissant un environnement robuste et moderne.
 
 ## Fonctionnalités
-- Génération automatique de projets Python configurés.
-- Supporte plusieurs frameworks : script simple, Django, Flask, etc.
-- Intégration avec **GitLab CI/CD** via `.gitlab-ci.yml`.
-- Validation de code et hooks avec **pre-commit**.
-- Modèle personnalisable via `cookiecutter.json`.
-- Scripts avant/après génération grâce à `pre_gen_project.py`.
+- Génération automatique et rapide de projets Python prêts à l'emploi.
+- Compatibilité avec plusieurs frameworks : script, Django, Flask, etc.
+- Prise en charge native de **GitLab CI/CD** via `.gitlab-ci.yml`.
+- Validation du code et gestion des hooks grâce à **pre-commit**.
+- Structure personnalisable via `cookiecutter.json`.
+- Scripts d'exécution avant/après génération grâce à `pre_gen_project.py` et `post_gen_project.py`.
 
 ## Structure générée
-Voici un exemple de structure générée par ce template :
+Voici un exemple de structure générée avec ce template :
 
 ```text
 .
 ├── .gitlab-ci.yml           # Configuration CI/CD pour GitLab
-├── cookiecutter.json        # Fichier de configuration pour votre modèle
-├── pre_gen_project.py       # Script exécuté avant la génération du projet
-├── post_gen_project.py      # Script exécuté après la génération du projet
-├── src/                     # Répertoire contenant le code principal
+├── .pre-commit-config.yaml  # Configuration des hooks pre-commit
+├── cookiecutter.json        # Fichier de personnalisation pour le template
+├── pre_gen_project.py       # Script exécuté avant la génération
+├── post_gen_project.py      # Script exécuté après la génération
+├── src/                     # Dossier contenant le code principal
 │   ├── __init__.py
-│   ├── main.py              # Exemple de script Python principal
-├── tests/                   # Répertoire pour les tests unitaires
+│   ├── main.py              # Exemple de script principal
+├── tests/                   # Dossier pour les tests unitaires
 │   ├── __init__.py
-│   ├── test_main.py         # Exemple de fichier de test avec pytest
-├── requirements.txt         # Dépendances Python
-├── README.md                # Documentation principale
-├── setup.py                 # Script d'installation pour votre projet
+│   ├── test_main.py         # Tests avec pytest
+├── pyproject.toml           # Gestion des dépendances avec Poetry
+├── poetry.lock              # Verrouillage des dépendances généré par Poetry
+├── README.md                # Documentation du projet
 └── LICENSE                  # Licence du projet
 ```
 
 ## Installation
+
 ### Prérequis
-1. Installer **Python 3.7+**
-2. Installer **Cookiecutter** via pip :
+1. Installer **Python 3.7+**.
+2. Installer **Cookiecutter** via pip :
    ```bash
    pip install cookiecutter
    ```
+3. Installer **Poetry** :
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
 
-### Génération d’un projet
-Utilisez Cookiecutter pour créer un nouveau projet. Exemple :
+### Création d’un projet
+Pour générer un nouveau projet, utilisez Cookiecutter :
 ```bash
-cookiecutter https://github.com/mon-utilisateur/mon-modele-cookiecutter.git
+cookiecutter https://github.com/stan-kempachi/cookiecutter-python-template.git
 ```
-
-Suivez les instructions interactives pour personnaliser votre projet.
+Suivez les instructions pour personnaliser votre projet.
 
 ## Utilisation
-1. Accédez au répertoire généré.
-2. Configurez les dépendances :
+1. Naviguez vers le répertoire généré.
+2. Installez les dépendances avec **Poetry** :
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
-3. Exécutez le projet :
+3. Lancez votre application :
    ```bash
-   python src/main.py
+   poetry run python src/main.py
    ```
 
 ## Développement
+
 ### Préparation
-Assurez-vous de configurer les hooks pre-commit :
+Pour configurer les hooks **pre-commit**, exécutez :
 ```bash
 pre-commit install
 ```
-Les hooks vérifient automatiquement le respect des bonnes pratiques lors des commits.
+Ces hooks vérifient automatiquement votre code avant chaque commit.
+
+### Gestion des dépendances
+- Ajouter une dépendance principale :
+  ```bash
+  poetry add <nom-du-paquet>
+  ```
+- Ajouter une dépendance de développement uniquement :
+  ```bash
+  poetry add --dev <nom-du-paquet>
+  ```
+
+### Tests unitaires
+Exécuter les tests :
+```bash
+poetry run pytest
+```
+Assurez-vous que tous les tests passent avant tout déploiement.
 
 ### Bonnes pratiques
 - Respectez les conventions **PEP 8**.
 - Ajoutez des tests pour toute nouvelle fonctionnalité.
-- Documentez les modifications majeures dans le README.
+- Mettez à jour la documentation en cas de modification importante.
 
 ## Intégration CI/CD
-Ce modèle inclut une configuration pour GitLab CI/CD via `.gitlab-ci.yml` :
-- **Linting** : Vérifie le style de code.
-- **Tests unitaires** : Exécute les tests avec `pytest`.
-- **Déploiement** (optionnel) : Ajoutez un job de déploiement personnalisé.
+Ce template inclut un fichier `.gitlab-ci.yml` qui configure automatiquement les pipelines pour GitLab CI/CD :
+- **Linting** : Pour vérifier la qualité du code.
+- **Tests unitaires** : Exécution des tests automatisés avec **pytest**.
+- **Déploiement** : Ajoutez une configuration personnalisée pour vos besoins.
 
-Pour activer la CI/CD, configurez votre projet GitLab après le premier commit.
+Pour activer la CI/CD, créez un dépôt GitLab et effectuez un **commit** initial.
 
 ## Personnalisation
-Modifiez `cookiecutter.json` selon vos besoins. Exemple :
+Adaptez `cookiecutter.json` pour ajuster le modèle à vos besoins spécifiques. Exemple :
 
 ```json
 {
@@ -91,35 +114,9 @@ Modifiez `cookiecutter.json` selon vos besoins. Exemple :
 }
 ```
 
-Ajoutez des scripts avant ou après génération dans `pre_gen_project.py` ou `post_gen_project.py`.
+Il est également possible d’ajouter des scripts pré et post génération via `pre_gen_project.py` et `post_gen_project.py`.
 
-## Tests
-Pour exécuter les tests :
-```bash
-pytest
-```
-Assurez-vous que votre code est correctement testé avant tout déploiement.
-
-## Contribuer
-1. Forkez ce dépôt.
-2. Travaillez dans une branche :
-   ```bash
-   git checkout -b ma-fonctionnalite
-   ```
-3. Soumettez une pull request et décrivez vos modifications.
-
-## FAQ
-### Pourquoi utiliser Cookiecutter ?
-Pour accélérer et normaliser la création de projets Python prêts à l’emploi.
-
-### Puis-je ajouter d'autres frameworks ?
-Oui ! Ajoutez simplement ces options dans `cookiecutter.json` et modifiez les scripts de génération si nécessaire.
-
-### Où signaler un problème ?
-Ouvrez une issue dans le dépôt GitHub.
-
-## À propos
-Ce modèle a été conçu pour simplifier la création et la maintenance de projets Python, en mettant en avant les meilleures pratiques.
+---
 
 ## Licence
-Ce projet est sous licence MIT. Consultez le fichier `LICENSE` pour plus de détails.
+Ce projet est distribué sous la licence [MIT](LICENSE).
