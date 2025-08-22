@@ -54,6 +54,12 @@ cleanup:
 generate_changelog:
   stage: version
   image: "node:lts"
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$CI_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
   script:
     # Fetch all branches and ensure we are on the correct one
     - git fetch --all
