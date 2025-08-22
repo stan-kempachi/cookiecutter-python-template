@@ -55,14 +55,17 @@ generate_changelog:
   stage: version
   image: "node:lts" # Use Node.js to run standard-version
   script:
-    # 1. Install local dependencies to manage `standard-version`
+    # Dynamically set Git user configuration using GitLab variables
+    - git config --global user.name "${GITLAB_USER_NAME}"
+    - git config --global user.email "${GITLAB_USER_EMAIL}"
+    # Install local dependencies to manage `standard-version`
     - npm install
-    # 2. Run `standard-version` to:
-    #    a) Increment (bump) the version
-    #    b) Update the CHANGELOG.md file
-    #    c) Add the corresponding Git tag for the new version
+    # Run `standard-version` to:
+    # a) Increment (bump) the version
+    # b) Update the CHANGELOG.md file
+    # c) Add the corresponding Git tag for the new version
     - npx standard-version --release-as auto
-    # 3. Push the changes (CHANGELOG.md and Git tag) to the repository
+    # Push the changes (CHANGELOG.md and Git tag) to the repository
     - git push origin main --follow-tags
   rules:
     - if: $CI_COMMIT_TAG == null
