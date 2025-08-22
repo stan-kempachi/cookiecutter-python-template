@@ -2,3 +2,4 @@
 .venv
 tests/__pycache__/
 node_modules/
+notes.txt
