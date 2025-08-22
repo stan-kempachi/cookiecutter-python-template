@@ -7,7 +7,7 @@ Ce projet offre une solution clé en main pour générer des templates Python mo
 - Génération automatique et rapide de projets Python prêts à l'emploi.
 - Compatibilité avec plusieurs frameworks : script, Django, Flask, etc.
 - Prise en charge native de **GitLab CI/CD** via `.gitlab-ci.yml`.
-- Validation du code et gestion des hooks grâce à **pre-commit**.
+- Validation du code et gestion des hooks grâce à **Husky** et **commitlint**.
 - Structure personnalisable via `cookiecutter.json`.
 - Scripts d'exécution avant/après génération grâce à `pre_gen_project.py` et `post_gen_project.py`.
 
@@ -17,7 +17,10 @@ Voici un exemple de structure générée avec ce template :
 ```text
 .
 ├── .gitlab-ci.yml           # Configuration CI/CD pour GitLab
-├── .pre-commit-config.yaml  # Configuration des hooks pre-commit
+├── .husky/                  # Répertoire pour les hooks Git via Husky
+│   ├── pre-commit           # Hook activé avant chaque commit
+│   ├── commit-msg           # Validation des messages de commit
+├── .pre-commit-config.yaml  # Configuration des hooks pre-commit (pré-existant)
 ├── cookiecutter.json        # Fichier de personnalisation pour le template
 ├── pre_gen_project.py       # Script exécuté avant la génération
 ├── post_gen_project.py      # Script exécuté après la génération
@@ -45,6 +48,11 @@ Voici un exemple de structure générée avec ce template :
    ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
+4. Installer **Node.js** (requis pour Husky et commitlint).
+5. Installer **Husky** et initialiser les hooks Git :
+   ```bash
+   npm exec husky-init && npm install
+   ```
 
 ### Création d’un projet
 Pour générer un nouveau projet, utilisez Cookiecutter :
@@ -67,21 +75,40 @@ Suivez les instructions pour personnaliser votre projet.
 ## Développement
 
 ### Préparation
-Pour configurer les hooks **pre-commit**, exécutez :
+Pour configurer les hooks **Husky et pre-commit**, exécutez :
 ```bash
 pre-commit install
 ```
-Ces hooks vérifient automatiquement votre code avant chaque commit.
+
+**Ajouter des hooks personnalisés :**
+- Exécuter les tests avant chaque commit :
+   ```bash
+   npx husky add .husky/pre-commit "npm test"
+   ```
+- Vérification des messages commit avec commitlint :
+   ```bash
+   npx husky add .husky/commit-msg "npx --no-install commitlint --edit $1"
+   ```
+
+Ces hooks permettent de garantir des commits validés et un workflow standardisé.
+
+### Audit de sécurité avec npm (nouvelle section)
+Pour garantir la sécurité des dépendances, utilisez **npm audit** pour identifier les vulnérabilités :
+```bash
+npm audit
+npm audit fix
+```
+Exécutez périodiquement ces commandes pour repérer et résoudre les problèmes potentiels.
 
 ### Gestion des dépendances
 - Ajouter une dépendance principale :
-  ```bash
-  poetry add <nom-du-paquet>
-  ```
+   ```bash
+   poetry add <nom-du-paquet>
+   ```
 - Ajouter une dépendance de développement uniquement :
-  ```bash
-  poetry add --dev <nom-du-paquet>
-  ```
+   ```bash
+   poetry add --dev <nom-du-paquet>
+   ```
 
 ### Tests unitaires
 Exécuter les tests :
@@ -113,10 +140,6 @@ Adaptez `cookiecutter.json` pour ajuster le modèle à vos besoins spécifiques.
   "framework": ["none", "django", "flask"]
 }
 ```
-
-Il est également possible d’ajouter des scripts pré et post génération via `pre_gen_project.py` et `post_gen_project.py`.
-
----
 
 ## Licence
 Ce projet est distribué sous la licence [MIT](LICENSE).
