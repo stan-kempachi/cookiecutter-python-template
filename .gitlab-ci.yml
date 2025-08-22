@@ -11,7 +11,7 @@ lint:
   stage: lint
   image: "python:3.12"
   before_script:
-    # Install pre-commit for linting
+    # Install pre-commit hooks for linting
     - pip install pre-commit
   script:
     # Run all pre-commit hooks
@@ -25,7 +25,7 @@ test:
     # Install pytest and cookiecutter for testing
     - pip install pytest cookiecutter
   script:
-    # Run tests to validate the template functionality
+    # Run tests to validate the functionality of the template
     - pytest tests
 
 # Generate Template Stage
@@ -33,12 +33,12 @@ generate-template:
   stage: generate-template
   image: "python:3.12"
   before_script:
-    # Install requirements for template generation
+    # Install dependencies required for template generation
     - pip install poetry cookiecutter
   script:
-    # Generate a project from the template
+    # Generate a project using the template
     - cookiecutter . --no-input
-    # Validate the generated project configuration (e.g., Poetry TOML file)
+    # Validate the configuration of the generated project (e.g., Poetry TOML file)
     - cd mon_super_projet && poetry check
 
 # Cleanup Stage
@@ -46,22 +46,31 @@ cleanup:
   stage: cleanup
   image: "alpine:latest"
   script:
-    # Clean up temporary files generated during the pipeline
+    # Clean up temporary files that were generated during the pipeline
     - echo "Cleaning up temporary generated project files."
     - rm -rf mon_super_projet
 
+# Generate Changelog and Tag
 generate_changelog:
   stage: version
+  image: "node:lts" # Use Node.js to run standard-version
   script:
+    # 1. Install local dependencies to manage `standard-version`
     - npm install
-    - npx standard-version
-    - git push origin --follow-tags
+    # 2. Run `standard-version` to:
+    #    a) Increment (bump) the version
+    #    b) Update the CHANGELOG.md file
+    #    c) Add the corresponding Git tag for the new version
+    - npx standard-version --release-as auto
+    # 3. Push the changes (CHANGELOG.md and Git tag) to the repository
+    - git push origin main --follow-tags
   rules:
     - if: $CI_COMMIT_TAG == null
 
 release:
   stage: release
   script:
-    - echo "Déploiement en cours..."
+    # CI/CD step to configure deployment to the target environment
+    - echo "Deployment in progress..."
   rules:
     - if: $CI_COMMIT_TAG != null
