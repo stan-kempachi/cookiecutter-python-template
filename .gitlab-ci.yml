@@ -3,6 +3,8 @@ stages:
   - test
   - generate-template
   - cleanup
+  - version
+  - release
 
 # Lint Stage
 lint:
@@ -47,3 +49,19 @@ cleanup:
     # Clean up temporary files generated during the pipeline
     - echo "Cleaning up temporary generated project files."
     - rm -rf mon_super_projet
+
+generate_changelog:
+  stage: version
+  script:
+    - npm install
+    - npx standard-version
+    - git push origin --follow-tags
+  rules:
+    - if: $CI_COMMIT_TAG == null
+
+release:
+  stage: release
+  script:
+    - echo "Déploiement en cours..."
+  rules:
+    - if: $CI_COMMIT_TAG != null
