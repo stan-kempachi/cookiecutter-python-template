@@ -65,13 +65,11 @@ generate_changelog:
     # Install local dependencies and handle vulnerabilities
     - npm install
     - npm audit fix || true
-    # Run `standard-version` to:
-    # a) Increment the version
-    # b) Update the CHANGELOG.md file
-    # c) Create the corresponding Git tag for the new version
+    # Increment the version, update the changelog, and tag
     - npx standard-version --release-as auto
-    # Push changes (CHANGELOG.md and Git tag) to the repository
-    - git push both --follow-tags
+    # Push changes to both remotes
+    - git push origin --follow-tags # Push to GitLab
+    - git push github --follow-tags # Push to GitHub
   rules:
     - if: $CI_COMMIT_TAG == null
 
