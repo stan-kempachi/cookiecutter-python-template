@@ -1,0 +1,35 @@
+# {{ cookiecutter.project_slug }}
+
+Bienvenue dans le projet **{{ cookiecutter.project_slug }}**.
+
+## Description
+
+Ce projet utilise :
+
+- **Framework** : {% if cookiecutter.framework == "flask" %}Flask{% elif cookiecutter.framework == "django" %}Django{% else %}Autre{% endif %}
+- **Package principal** : {{ cookiecutter.package_name }}
+- **Chemin** : {{ cookiecutter._output_dir }}
+
+## Commandes de Base
+
+### Installation des dépendances
+
+```bash
+poetry install
+```
+
+### Lancement
+
+{% if cookiecutter.framework == "flask" %}
+- Pour Flask :
+```bash
+poetry run flask run
+```
+{% elif cookiecutter.framework == "django" %}
+- Pour Django :
+```bash
+poetry run python manage.py runserver
+```
+{% else %}
+- Lancement non défini pour ce framework.
+{% endif %}
