@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [null.null.1](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.3.4...vnull.null.1) (2025-08-23)
+
+
+### Features
+
+* add new template feature to test versioning pipeline ([d7c42b5](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/d7c42b59297f73acf721eafbf442daba807323b9))
+
+
+### Bug Fixes
+
+* **ci:** resolve SSH key loading issue and improve error handling ([66e39b2](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/66e39b2bd2938c33ea1355e2637b51d5891ba987))
+* **ci:** stop infinite pipeline loops and synchronize repositories ([7c44679](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/7c44679cbefa8bf268b8118bad1e1cab43248593))
+
 ### [1.3.4](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.3.3...v1.3.4) (2025-08-23)
 
 ### [1.3.3](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.3.2...v1.3.3) (2025-08-23)
