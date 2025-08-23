@@ -89,8 +89,12 @@ generate_changelog:
         echo "Error: Version in package.json is null";
         exit 1;
       fi
-    # Incrémentation et génération des tags
-    - npx standard-version --release-as auto
+    # Forcer une version si l'incrémentation auto échoue
+    - |
+      if ! npx standard-version --release-as auto; then
+        echo "Auto increment failed. Forcing patch version..."
+        npx standard-version --release-as patch
+      fi
     # Vérifier que la version est valide
     - |
       if grep '"version": null' package.json; then
