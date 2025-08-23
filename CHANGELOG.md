@@ -8,7 +8,6 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * **ci:** Remove CHANGELOG.md and reset package version to 1.0.0 ([25ab4c2](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/25ab4c2fb26d81d65ba09d5441dbf7bc328ac635))
-* **ci:** resolve syntax error in branch checkout script ([d0909ed](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/d0909edc29cfb6c5e85149ea7d535ccf30178ce7))
 * **ci:** Set version to 1.0.0 in package.json ([857bdd5](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/857bdd55edd3e8b0ba8e4929545afa18cbb250bc))
 
 ## 1.0.0 (2025-08-23)
