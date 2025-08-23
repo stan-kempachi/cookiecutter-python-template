@@ -18,3 +18,4 @@ coverage.xml
 dist/
 build/
 *.egg-info/
+/sync-repos.sh
