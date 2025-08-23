@@ -67,11 +67,13 @@ generate_changelog:
     - git remote add github git@github.com:stan-kempachi/cookiecutter-python-template.git || echo 'GitHub remote already exists.'
     - git fetch --all
     # Désambigüer les branches pour éviter les conflits entre remotes
-    - if [ "${CI_COMMIT_BRANCH}" != "" ]; then \
-      git checkout -b "${CI_COMMIT_BRANCH}" --track origin/"${CI_COMMIT_BRANCH}" || \
-      git checkout "${CI_COMMIT_BRANCH}"; \
-      else \
-      git checkout -b master --track origin/master || git checkout master; \
+    - |
+      if [ "${CI_COMMIT_BRANCH}" != "" ]; then
+        git checkout -b "${CI_COMMIT_BRANCH}" --track origin/"${CI_COMMIT_BRANCH}" || 
+        git checkout "${CI_COMMIT_BRANCH}";
+      else
+        git checkout -b master --track origin/master || 
+        git checkout master;
       fi
     # Configure the remote URL to SSH
     - git remote set-url origin git@gitlab.com:adm.standev/cookiecutter-python-template.git
