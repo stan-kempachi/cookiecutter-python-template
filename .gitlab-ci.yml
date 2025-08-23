@@ -1,3 +1,10 @@
+# Définition des règles globales
+.default_rules:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "version-lock"'
+      when: never
+    - when: always
+
 stages:
   - lint
   - test
@@ -10,6 +17,8 @@ stages:
 lint:
   stage: lint
   image: "python:3.12"
+  rules:
+    - !reference [.default_rules, rules]
   before_script:
     - pip install pre-commit
   script:
@@ -19,6 +28,8 @@ lint:
 test:
   stage: test
   image: "python:3.12"
+  rules:
+    - !reference [.default_rules, rules]
   before_script:
     - pip install pytest cookiecutter
   script:
@@ -28,6 +39,8 @@ test:
 generate-template:
   stage: generate-template
   image: "python:3.12"
+  rules:
+    - !reference [.default_rules, rules]
   before_script:
     - pip install poetry cookiecutter
   script:
@@ -38,6 +51,8 @@ generate-template:
 cleanup:
   stage: cleanup
   image: "alpine:latest"
+  rules:
+    - !reference [.default_rules, rules]
   script:
     - echo "Cleaning up temporary generated project files."
     - rm -rf mon_super_projet
@@ -48,6 +63,8 @@ generate_changelog:
   image: "node:lts"
   # Conditions pour éviter les boucles infinies
   rules:
+    - if: '$CI_COMMIT_BRANCH == "version-lock"'
+      when: never
     - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]/ || $CI_COMMIT_MESSAGE =~ /chore\(release\)/'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "web"'
@@ -55,11 +72,11 @@ generate_changelog:
     - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"'
       when: always
   before_script:
-    # SSH and Git configuration with improved error handling
+    # Installation des outils nécessaires
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git jq -y )'
     - eval $(ssh-agent -s)
 
-    # Configuration SSH et Git sécurisée (comme précédemment)
+    # Configuration SSH et Git sécurisée
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "$CI_SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
@@ -98,12 +115,12 @@ generate_changelog:
       # Tentative de récupération de la HEAD de GitHub
       if git rev-parse github/${CI_COMMIT_BRANCH} &>/dev/null; then
         GITHUB_HEAD=$(git rev-parse github/${CI_COMMIT_BRANCH})
-        
+      
         if [ "$GITLAB_HEAD" != "$GITHUB_HEAD" ]; then
           echo "Les dépôts ne sont pas synchronisés!"
           echo "GitLab HEAD: $GITLAB_HEAD"
           echo "GitHub HEAD: $GITHUB_HEAD"
-          
+      
           # Si GitHub est en avance, on synchronise GitLab
           if git merge-base --is-ancestor $GITLAB_HEAD $GITHUB_HEAD; then
             echo "GitHub est en avance, on synchronise GitLab..."
@@ -114,112 +131,77 @@ generate_changelog:
             echo "GitLab est en avance, GitHub sera synchronisé après le versionnement"
           fi
         else
-          echo "Les dépôts sont synchronisés!"
+          echo "Les dépôts sont synchronisés"
         fi
       else
-        echo "La branche n'existe pas sur GitHub, elle sera créée."
+        echo "La branche ${CI_COMMIT_BRANCH} n'existe pas sur GitHub, elle sera créée"
       fi
 
-    # Installation des dépendances nécessaires
-    - apt-get update -y && apt-get install jq -y
-    - npm install
+    # Installation des dépendances Node.js
+    - npm ci || npm install
+
   script:
-    # Vérification de l'environnement
-    - echo "État actuel du dépôt:"
-    - git status
-    - echo "Tags existants:"
-    - git tag -l | sort -V
-
-    # Initialisation de la version si nécessaire
+    # Vérification de la cohérence des versions
+    - echo "Vérification de la version dans package.json"
+    - PKG_VERSION=$(jq -r .version package.json)
     - |
-      if ! jq -e '.version' package.json > /dev/null || [ "$(jq -r '.version' package.json)" = "null" ]; then
-        echo "Initialisation de la version dans package.json..."
-        jq '.version = "1.0.0"' package.json > package.json.tmp && mv package.json.tmp package.json
-        git add package.json
-        git commit -m "fix: initialiser la version à 1.0.0 [skip ci]"
+      echo "Version dans package.json: $PKG_VERSION"
+
+    # Vérification de package-lock.json
+    - echo "Vérification de la version dans package-lock.json"
+    - LOCK_VERSION=$(jq -r .version package-lock.json)
+    - LOCK_PKG_VERSION=$(jq -r '.packages."".version' package-lock.json)
+    - |
+      echo "Version dans package-lock.json header: $LOCK_VERSION"
+    - |
+      echo "Version dans package-lock.json packages: $LOCK_PKG_VERSION"
+
+    # Correction si nécessaire
+    - |
+      if [ "$PKG_VERSION" != "$LOCK_VERSION" ] || [ "$PKG_VERSION" != "$LOCK_PKG_VERSION" ]; then
+        echo "Incohérence détectée dans les versions. Mise à jour du package-lock.json..."
+        npm install --package-lock-only
+        git add package-lock.json
+        git commit -m "fix: corriger l'incohérence de version dans package-lock.json [skip ci]"
       fi
 
-    # Génération d'une nouvelle version avec prévention des conflits
+    # Exécution de standard-version avec options explicites
     - |
-      # Déterminer la prochaine version
-      CURRENT_VERSION=$(jq -r '.version' package.json)
-      HIGHEST_TAG=$(git tag -l "v*" | sort -V | tail -n 1)
-      
-      echo "Version actuelle dans package.json: $CURRENT_VERSION"
-      echo "Tag le plus élevé: $HIGHEST_TAG"
-      
-      # Création du verrou pour éviter les modifications simultanées
-      LOCK_BRANCH="version-lock"
-      if git ls-remote --heads origin $LOCK_BRANCH | grep -q $LOCK_BRANCH; then
-        echo "Un autre processus de versionnement est en cours. Arrêt."
-        exit 1
-      fi
-      
-      # Créer la branche de verrouillage
-      git checkout -b $LOCK_BRANCH
-      git push -f origin $LOCK_BRANCH
-      git checkout ${CI_COMMIT_BRANCH}
-      
-      # Déterminer la prochaine version
-      if [ -n "$HIGHEST_TAG" ]; then
-        # Enlever le préfixe 'v' si présent
-        HIGHEST_VERSION=${HIGHEST_TAG#v}
-        
-        # Comparer les versions et déterminer la prochaine version
-        MAJOR=$(echo $HIGHEST_VERSION | cut -d. -f1)
-        MINOR=$(echo $HIGHEST_VERSION | cut -d. -f2)
-        PATCH=$(echo $HIGHEST_VERSION | cut -d. -f3)
-        
-        # Calculer la prochaine version patch
-        NEXT_PATCH=$((PATCH + 1))
-        NEXT_VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
-        
-        echo "Prochaine version calculée: $NEXT_VERSION"
-        
-        # Mettre à jour package.json et package-lock.json avec la nouvelle version
-        jq ".version = \"$NEXT_VERSION\"" package.json > tmp.$$ && mv tmp.$$ package.json
-        if [ -f "package-lock.json" ]; then
-          jq ".version = \"$NEXT_VERSION\"" package-lock.json > tmp.$$ && mv tmp.$$ package-lock.json
-        fi
-        
-        # Générer le changelog manuellement
-        echo "Génération du changelog pour la version $NEXT_VERSION"
-        npx standard-version --skip.bump --skip.tag --skip.commit --release-as $NEXT_VERSION
-        
-        # Commit des changements avec [skip ci] pour éviter de déclencher un nouveau pipeline
-        git add package.json package-lock.json CHANGELOG.md
-        git commit -m "chore(release): $NEXT_VERSION [skip ci]"
-        
-        # Créer le nouveau tag
-        git tag -a "v$NEXT_VERSION" -m "chore(release): $NEXT_VERSION"
+      echo "Exécution de standard-version pour créer une nouvelle version..."
+      npx standard-version --release-as patch
+
+    # Récupération de la nouvelle version
+    - NEW_VERSION=$(jq -r .version package.json)
+    - |
+      echo "Nouvelle version: $NEW_VERSION"
+
+    # Push vers GitLab
+    - |
+      git push --follow-tags origin ${CI_COMMIT_BRANCH}
+
+    # Push vers GitHub
+    - |
+      echo "Synchronisation avec GitHub..."
+      if git rev-parse github/${CI_COMMIT_BRANCH} &>/dev/null; then
+        echo "Mise à jour de la branche existante sur GitHub"
+        git push --follow-tags github ${CI_COMMIT_BRANCH}
       else
-        # Aucun tag n'existe, utiliser standard-version normalement
-        echo "Aucun tag de version existant. Création de la version initiale..."
-        npx standard-version --release-as patch --message "chore(release): %s [skip ci]"
+        echo "Création de la branche sur GitHub"
+        git push --follow-tags github ${CI_COMMIT_BRANCH}
       fi
-      
-      # Supprimer la branche de verrouillage après usage
-      git push origin --delete $LOCK_BRANCH || echo "Impossible de supprimer la branche de verrouillage"
 
-    # Vérifier que la version a été correctement générée
-    - |
-      NEW_VERSION=$(jq -r '.version' package.json)
-      if [ "$NEW_VERSION" = "null" ] || [ -z "$NEW_VERSION" ]; then
-        echo "Erreur: Version invalide générée"
-        exit 1
-      else
-        echo "Version générée avec succès: $NEW_VERSION"
-        
-        # Pousser les changements aux deux dépôts distants avec [skip ci]
-        echo "Synchronisation des dépôts GitLab et GitHub..."
-        git push origin ${CI_COMMIT_BRANCH} --follow-tags
-        git push github ${CI_COMMIT_BRANCH} --follow-tags || echo "Échec de la synchronisation avec GitHub (non critique)"
-      fi
-# Release Stage
+# Release Stage - création des artifacts
 release:
   stage: release
-  image: "node:lts"
-  script:
-    - echo "Deployment in progress..."
+  image: "python:3.12"
   rules:
-    - if: $CI_COMMIT_TAG != null
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: always
+  script:
+    - echo "Version $CI_COMMIT_TAG est maintenant publiée!"
+    - echo "Création des artifacts pour la version $CI_COMMIT_TAG"
+    # Vous pouvez ajouter ici des étapes pour créer des archives, des binaires, etc.
+  artifacts:
+    paths:
+      - "{{cookiecutter.project_slug}}/"
+    expire_in: 1 week
