@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": null,
   "devDependencies": {
     "commitizen": "^3.1.2",
     "cz-conventional-changelog": "^3.3.0",
