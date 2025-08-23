@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.3.0...v) (2025-08-23)
+### [1.0.1](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.3.0...v1.0.1) (2025-08-23)
 
 
 ### Bug Fixes
