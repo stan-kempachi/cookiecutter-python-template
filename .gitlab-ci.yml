@@ -47,6 +47,7 @@ generate_changelog:
   stage: version
   image: "node:lts"
   before_script:
+    - apt-get update -y && apt-get install jq -y
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - echo "$CI_SSH_KEY" | tr -d '\r' | ssh-add -
