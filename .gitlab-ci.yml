@@ -65,6 +65,8 @@ generate_changelog:
     - git remote add origin "${CI_REPOSITORY_URL}" || echo 'Remote already exists.'
     - git fetch --all
     - if [ "${CI_COMMIT_BRANCH}" != "" ]; then git checkout "${CI_COMMIT_BRANCH}"; else git checkout -b master; fi
+    # Configure the remote URL to SSH
+    - git remote set-url origin git@gitlab.com:adm.standev/cookiecutter-python-template.git
   script:
     - pwd
     - ls -al
