@@ -137,7 +137,7 @@ Adaptez `cookiecutter.json` pour ajuster le modèle à vos besoins spécifiques.
 {
   "project_name": "Mon Projet",
   "author_name": "Votre Nom",
-  "framework": ["none", "django", "flask"]
+  "framework": ["Script", "django", "flask"]
 }
 ```
 
