@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.0.1...v1.3.1) (2025-08-23)
+
+
+### Bug Fixes
+
+* CI pipeline for versioning and dependency handling ([9415bc9](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/9415bc9644b5b0c5b80b47e8405ecea0dc9b48bf))
+* **ci:** implement robust version tag handling system ([1a7e8c5](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/1a7e8c5df0269214e8c95a5cca3b9041ccf03efe))
+* **ci:** Improve versioning fallback in GitLab CI pipeline ([10c6b78](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/10c6b785ecfb7ea694e2079bcc55845cae06387c))
+* **ci:** install jq explicitly and translate comments to English ([5871943](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/5871943f38121e8d9cd5cc693d06a03879733796))
+* **ci:** Set project version to 1.0.0 and update dependencies ([34a9394](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/34a93949cd0756a95cbf846f683c0c0b9c7b6792))
+* **ci:** Update GitLab CI versioning process and streamline steps ([d800dcd](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/d800dcdc66491bee4746c65d1d16dcba0109931b))
+* **ci:** Update GitLab CI versioning process and streamline steps ([8a9e7b1](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/8a9e7b1eadf1cc1f248f469a2daf4f73ecdd4c56))
+* force version increment ([861778f](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/861778f58349827d5fab3e65085bc9725be5f878))
+* Handle existing version tags in GitLab CI release process ([17b9b57](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/17b9b57672215857154b234e339931b54147f44b))
+
 ### 1.0.1 (2025-08-23)
 
 
