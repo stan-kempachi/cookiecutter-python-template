@@ -112,7 +112,16 @@ generate_changelog:
     - |
       # Utiliser toujours patch pour éviter les problèmes avec auto
       echo "Création d'une nouvelle version avec increment 'patch'..."
-      npx standard-version --release-as patch
+      # Vérifier si la version courante existe déjà en tant que tag
+      CURRENT_VERSION=$(jq -r '.version' package.json)
+      TAG_EXISTS=$(git tag -l "v$CURRENT_VERSION")
+      
+      if [ -n "$TAG_EXISTS" ]; then
+        echo "Le tag v$CURRENT_VERSION existe déjà, utilisation de --skip.tag"
+        npx standard-version --release-as patch --skip.tag
+      else
+        npx standard-version --release-as patch
+      fi
 
     # Vérifier que la version a été correctement générée
     - |
