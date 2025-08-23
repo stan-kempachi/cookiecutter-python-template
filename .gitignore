@@ -3,3 +3,18 @@
 tests/__pycache__/
 node_modules/
 notes.txt
+/id_ed25519_ci_pipeline
+/id_ed25519_ci_pipeline.pub
+/id_rsa_ci_pipeline
+/id_rsa_ci_pipeline.pub
+
+# Windows
+Thumbs.db
+
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+dist/
+build/
+*.egg-info/
