@@ -46,155 +46,175 @@ cleanup:
 generate_changelog:
   stage: version
   image: "node:lts"
+  # Conditions pour éviter les boucles infinies
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[skip ci\]/ || $CI_COMMIT_MESSAGE =~ /chore\(release\)/'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"'
+      when: always
   before_script:
     # SSH and Git configuration with improved error handling
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git jq -y )'
     - eval $(ssh-agent -s)
 
-    # Verify SSH key exists and isn't empty
-    - |
-      if [ -z "$CI_SSH_KEY" ]; then
-        echo "ERROR: CI_SSH_KEY variable is not set or empty"
-        exit 1
-      fi
-
-    # Create SSH key with proper format and permissions
+    # Configuration SSH et Git sécurisée (comme précédemment)
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "$CI_SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub || echo "Failed to generate public key (this is ok if using deploy keys)"
-
-    # Add the key to the agent
     - ssh-add ~/.ssh/id_rsa
-
-    # Configure known hosts
     - ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
     - ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
-    # Continue with Git setup
+    # Configuration Git améliorée
+    - git config --global user.name "${GITLAB_USER_NAME:-CI Bot}"
+    - git config --global user.email "${GITLAB_USER_EMAIL:-ci-bot@example.com}"
+
+    # Initialisation du dépôt et configuration des remotes
     - git init || true
     - git remote add origin "${CI_REPOSITORY_URL}" || echo 'Remote already exists.'
     - git remote add github git@github.com:stan-kempachi/cookiecutter-python-template.git || echo 'GitHub remote already exists.'
-    - git fetch --all
+    - git remote set-url origin git@gitlab.com:adm.standev/cookiecutter-python-template.git
+
+    # Récupération complète des données de tous les dépôts distants
+    - git fetch --all --tags --prune --force
+
+    # Checkout de la branche actuelle avec synchronisation
     - |
       if [ "${CI_COMMIT_BRANCH}" != "" ]; then
-        git checkout -b "${CI_COMMIT_BRANCH}" --track origin/"${CI_COMMIT_BRANCH}" || 
-        git checkout "${CI_COMMIT_BRANCH}";
+        git checkout -B "${CI_COMMIT_BRANCH}" "origin/${CI_COMMIT_BRANCH}"
       else
-        git checkout -b master --track origin/master || 
-        git checkout master;
+        git checkout -B master origin/master
       fi
-    - git remote set-url origin git@gitlab.com:adm.standev/cookiecutter-python-template.git
-    - git config --global user.name "${GITLAB_USER_NAME:-ci-user}"
-    - git config --global user.email "${GITLAB_USER_EMAIL:-ci-user@gitlab.com}"
-    - git fetch --tags
-    # Install jq explicitly
+
+    # Vérification de la synchronisation entre GitHub et GitLab
+    - |
+      echo "Vérification de la synchronisation des dépôts..."
+      GITLAB_HEAD=$(git rev-parse HEAD)
+      git fetch github
+      
+      # Tentative de récupération de la HEAD de GitHub
+      if git rev-parse github/${CI_COMMIT_BRANCH} &>/dev/null; then
+        GITHUB_HEAD=$(git rev-parse github/${CI_COMMIT_BRANCH})
+        
+        if [ "$GITLAB_HEAD" != "$GITHUB_HEAD" ]; then
+          echo "Les dépôts ne sont pas synchronisés!"
+          echo "GitLab HEAD: $GITLAB_HEAD"
+          echo "GitHub HEAD: $GITHUB_HEAD"
+          
+          # Si GitHub est en avance, on synchronise GitLab
+          if git merge-base --is-ancestor $GITLAB_HEAD $GITHUB_HEAD; then
+            echo "GitHub est en avance, on synchronise GitLab..."
+            git merge github/${CI_COMMIT_BRANCH} --no-edit -m "chore: synchroniser avec GitHub [skip ci]"
+            git push origin ${CI_COMMIT_BRANCH}
+          # Si GitLab est en avance, on synchronise GitHub (sera fait plus tard)
+          else
+            echo "GitLab est en avance, GitHub sera synchronisé après le versionnement"
+          fi
+        else
+          echo "Les dépôts sont synchronisés!"
+        fi
+      else
+        echo "La branche n'existe pas sur GitHub, elle sera créée."
+      fi
+
+    # Installation des dépendances nécessaires
     - apt-get update -y && apt-get install jq -y
-  script:
-    # Environment verification
-    - pwd
-    - ls -al
-    - echo "Current Git remotes:"
-    - git remote -v
-    - echo "Current branch and status:"
-    - git branch
-    - git status
-
-    # Display commit history for debugging
-    - echo "Last 5 commits:"
-    - git log -n 5 --pretty=format:"%h - %s (%an, %ar)"
-
-    # Display current tags
-    - echo "Existing tags:"
-    - git tag -l
-
-    # Install dependencies
     - npm install
+  script:
+    # Vérification de l'environnement
+    - echo "État actuel du dépôt:"
+    - git status
+    - echo "Tags existants:"
+    - git tag -l | sort -V
 
-    # Check and fix version if needed
+    # Initialisation de la version si nécessaire
     - |
       if ! jq -e '.version' package.json > /dev/null || [ "$(jq -r '.version' package.json)" = "null" ]; then
-        echo "Fixing invalid or missing version in package.json..."
+        echo "Initialisation de la version dans package.json..."
         jq '.version = "1.0.0"' package.json > package.json.tmp && mv package.json.tmp package.json
         git add package.json
-        git commit -m "fix: set initial version to 1.0.0" || echo "No changes to commit"
+        git commit -m "fix: initialiser la version à 1.0.0 [skip ci]"
       fi
 
-    # Create empty conventional commit if needed
+    # Génération d'une nouvelle version avec prévention des conflits
     - |
-      # Check if there are conventional commits
-      if ! git log -n 10 --pretty=format:"%s" | grep -E "^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\([a-z]+\))?:"; then
-        echo "No conventional commits found. Creating empty commit..."
-        git commit --allow-empty -m "chore: prepare for new version"
-      fi
-
-    # Use --release-as patch instead of auto
-    - |
-      # First check existing tags and current version
+      # Déterminer la prochaine version
       CURRENT_VERSION=$(jq -r '.version' package.json)
-      echo "Current version in package.json: $CURRENT_VERSION"
-      
-      # Find the highest existing version tag
       HIGHEST_TAG=$(git tag -l "v*" | sort -V | tail -n 1)
-      echo "Highest existing tag: $HIGHEST_TAG"
       
+      echo "Version actuelle dans package.json: $CURRENT_VERSION"
+      echo "Tag le plus élevé: $HIGHEST_TAG"
+      
+      # Création du verrou pour éviter les modifications simultanées
+      LOCK_BRANCH="version-lock"
+      if git ls-remote --heads origin $LOCK_BRANCH | grep -q $LOCK_BRANCH; then
+        echo "Un autre processus de versionnement est en cours. Arrêt."
+        exit 1
+      fi
+      
+      # Créer la branche de verrouillage
+      git checkout -b $LOCK_BRANCH
+      git push -f origin $LOCK_BRANCH
+      git checkout ${CI_COMMIT_BRANCH}
+      
+      # Déterminer la prochaine version
       if [ -n "$HIGHEST_TAG" ]; then
-        # Remove 'v' prefix if present
+        # Enlever le préfixe 'v' si présent
         HIGHEST_VERSION=${HIGHEST_TAG#v}
         
-        # Compare versions and determine next version
+        # Comparer les versions et déterminer la prochaine version
         MAJOR=$(echo $HIGHEST_VERSION | cut -d. -f1)
         MINOR=$(echo $HIGHEST_VERSION | cut -d. -f2)
         PATCH=$(echo $HIGHEST_VERSION | cut -d. -f3)
         
-        # Calculate next patch version
+        # Calculer la prochaine version patch
         NEXT_PATCH=$((PATCH + 1))
         NEXT_VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
         
-        echo "Calculated next version: $NEXT_VERSION"
+        echo "Prochaine version calculée: $NEXT_VERSION"
         
-        # Update package.json and package-lock.json with the new version
+        # Mettre à jour package.json et package-lock.json avec la nouvelle version
         jq ".version = \"$NEXT_VERSION\"" package.json > tmp.$$ && mv tmp.$$ package.json
         if [ -f "package-lock.json" ]; then
           jq ".version = \"$NEXT_VERSION\"" package-lock.json > tmp.$$ && mv tmp.$$ package-lock.json
         fi
         
-        # Generate changelog manually
-        echo "Generating changelog for version $NEXT_VERSION"
+        # Générer le changelog manuellement
+        echo "Génération du changelog pour la version $NEXT_VERSION"
         npx standard-version --skip.bump --skip.tag --skip.commit --release-as $NEXT_VERSION
         
-        # Commit changes
+        # Commit des changements avec [skip ci] pour éviter de déclencher un nouveau pipeline
         git add package.json package-lock.json CHANGELOG.md
-        git commit -m "chore(release): $NEXT_VERSION"
+        git commit -m "chore(release): $NEXT_VERSION [skip ci]"
         
-        # Create new tag
+        # Créer le nouveau tag
         git tag -a "v$NEXT_VERSION" -m "chore(release): $NEXT_VERSION"
       else
-        # No tags exist, use standard-version normally
-        echo "No existing version tags found. Creating initial version..."
-        npx standard-version --release-as patch
+        # Aucun tag n'existe, utiliser standard-version normalement
+        echo "Aucun tag de version existant. Création de la version initiale..."
+        npx standard-version --release-as patch --message "chore(release): %s [skip ci]"
       fi
+      
+      # Supprimer la branche de verrouillage après usage
+      git push origin --delete $LOCK_BRANCH || echo "Impossible de supprimer la branche de verrouillage"
 
-    # Verify that version was properly generated
+    # Vérifier que la version a été correctement générée
     - |
       NEW_VERSION=$(jq -r '.version' package.json)
       if [ "$NEW_VERSION" = "null" ] || [ -z "$NEW_VERSION" ]; then
-        echo "Error: Invalid version generated"
-        git reset --hard
+        echo "Erreur: Version invalide générée"
         exit 1
       else
-        echo "Successfully generated version: $NEW_VERSION"
+        echo "Version générée avec succès: $NEW_VERSION"
+        
+        # Pousser les changements aux deux dépôts distants avec [skip ci]
+        echo "Synchronisation des dépôts GitLab et GitHub..."
+        git push origin ${CI_COMMIT_BRANCH} --follow-tags
+        git push github ${CI_COMMIT_BRANCH} --follow-tags || echo "Échec de la synchronisation avec GitHub (non critique)"
       fi
-
-    # Display new version and push changes
-    - |
-      export VERSION=$(jq -r '.version' package.json)
-      echo "New version: $VERSION"
-      echo "Pushing changes and tags to remote repositories..."
-      git push origin HEAD:${CI_COMMIT_BRANCH} --follow-tags
-      git push github HEAD:${CI_COMMIT_BRANCH} --follow-tags || echo "Failed to push to GitHub (this is not critical)"
-
 # Release Stage
 release:
   stage: release
