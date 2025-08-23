@@ -8,9 +8,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### Bug Fixes
 
 * **ci:** Remove CHANGELOG.md and reset package version to 1.0.0 ([25ab4c2](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/25ab4c2fb26d81d65ba09d5441dbf7bc328ac635))
-* **ci:** Set version to 1.0.0 in package.json ([80a7f3d](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/80a7f3dc21acf36284f94e8c8f2130bc791ce18f))
 * **ci:** Set version to 1.0.0 in package.json ([857bdd5](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/857bdd55edd3e8b0ba8e4929545afa18cbb250bc))
-* set version in package-lock.json to match package.json ([381af89](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/381af894ae7176d6d87f21aa0a272a08d4399ab9))
 * set version in package-lock.json to match package.json ([c4a8c16](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/c4a8c165e7f1ad2f0468e150db1390d86e98ea93))
 
 ## 1.0.0 (2025-08-23)
@@ -34,4 +32,3 @@ All notable changes to this project will be documented in this file. See [standa
 * **ci:** resolve syntax error in branch checkout script ([d0909ed](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/d0909edc29cfb6c5e85149ea7d535ccf30178ce7))
 * **ci:** set Git remote URL to use SSH for proper push permissions ([740521c](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/740521cf7f4e7b3cf0d3b29645ac18e91219bd54))
 * corrections for GitLab CI branch support ([78aeb24](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/78aeb243441985bdffe7d2f77828c650ade29c87))
-* corrections for GitLab CI branch support ([d0179a1](https://gitlab.com/adm.standev/cookiecutter-python-template/commit/d0179a1f2d2489542fb0151d729f4e9ec4c3b25a))
