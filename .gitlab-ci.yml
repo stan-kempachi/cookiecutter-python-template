@@ -73,7 +73,9 @@ generate_changelog:
       when: always
   before_script:
     # Installation des outils nécessaires
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git jq -y )'
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    # Installer jq explicitement
+    - apt-get update -y && apt-get install jq -y
     - eval $(ssh-agent -s)
 
     # Configuration SSH et Git sécurisée
