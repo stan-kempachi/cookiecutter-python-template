@@ -70,7 +70,7 @@ def render_jinja_templates():
 
                         # Écriture dans un fichier sans extension .j2
                         with open(
-                            rendered_file_path, "w", encoding="utf-8"
+                                rendered_file_path, "w", encoding="utf-8"
                         ) as rendered_file:
                             rendered_file.write(rendered_content)
                             print(f"✔️ Rendu du fichier : {rendered_file_path}")
@@ -95,7 +95,42 @@ def print_final_instructions():
         print("➡️ Étapes suivantes :")
         print(f"cd {project_slug}")
         print("poetry install")
-        print(f"poetry run python -m {package_name}")
+
+        # Ajouter des instructions spécifiques pour Django
+        if framework == "django":
+            print("\n# Pour les projets Django :")
+            print("poetry shell  # Activer l'environnement virtuel")
+            print("django-admin startproject config .  # Créer le fichier manage.py")
+
+        # Ajouter des instructions spécifiques pour Flask
+        elif framework == "flask":
+            print("\n# Pour les projets Flask :")
+            print("poetry shell  # Activer l'environnement virtuel")
+            print("# Créer un fichier app.py dans le dossier de l'application")
+            print(f"touch {package_name}/app.py")
+            print("# Définir la variable d'environnement FLASK_APP")
+            print(f"export FLASK_APP={package_name}.app  # Sur Linux/Mac")
+            print(f"set FLASK_APP={package_name}.app  # Sur Windows")
+
+        print("=" * 40)
+    except Exception as e:
+        print(f"❌ Erreur dans print_final_instructions : {e}")
+    """
+    Affiche les instructions finales pour l'utilisateur une fois le projet généré.
+    """
+    try:
+        # Logique actuelle
+        print(f"✅ Projet '{project_slug}' généré avec succès !")
+        print("➡️ Étapes suivantes :")
+        print(f"cd {project_slug}")
+        print("poetry install")
+
+        # Ajouter des instructions spécifiques pour Django
+        if framework == "django":
+            print("\n# Pour les projets Django :")
+            print("poetry shell  # Activer l'environnement virtuel")
+            print("django-admin startproject config .  # Créer le fichier manage.py")
+
         print("=" * 40)
     except Exception as e:
         print(f"❌ Erreur dans print_final_instructions : {e}")
