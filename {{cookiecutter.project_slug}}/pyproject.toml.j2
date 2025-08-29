@@ -13,7 +13,7 @@ flask = "^2.3"
 django = "^4.2"
 {% endif %}
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 {% if cookiecutter.use_black == "yes" %}
 black = "*"
 isort = "*"
