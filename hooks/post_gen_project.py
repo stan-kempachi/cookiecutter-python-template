@@ -70,7 +70,7 @@ def render_jinja_templates():
 
                         # Écriture dans un fichier sans extension .j2
                         with open(
-                                rendered_file_path, "w", encoding="utf-8"
+                            rendered_file_path, "w", encoding="utf-8"
                         ) as rendered_file:
                             rendered_file.write(rendered_content)
                             print(f"✔️ Rendu du fichier : {rendered_file_path}")
