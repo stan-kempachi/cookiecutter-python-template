@@ -1,44 +1,24 @@
-import json
-from collections import OrderedDict
-from pathlib import Path
+"""Validation des réponses avant génération."""
 
+import re
+import sys
 
-def main():
-    """Exemple de hook pré-génération."""
-    # Définir le chemin racine (répertoire actuel du fichier)
-    project_root = Path(
-        __file__
-    ).parent  # Pas d'utilisation de resolve() pour garder les chemins relatifs
+PROJECT_SLUG = "{{ cookiecutter.project_slug }}"
+PACKAGE_NAME = "{{ cookiecutter.package_name }}"
+PYTHON_VERSION = "{{ cookiecutter.python_version }}"
 
-    # Chemins relatifs
-    template_dir = project_root / "template"
-    output_dir = template_dir / "test_generated_template"
-    repo_dir = project_root
+IDENTIFIANT = re.compile(r"^[a-z][a-z0-9_]*$")
 
-    # Créer le contexte avec chemins relatifs
-    context = OrderedDict(
-        {
-            "project_name": "Mon super projet",
-            "project_slug": "mon_super_projet",
-            "package_name": "core",
-            "framework": "script",
-            "use_app_folder": "yes",
-            "use_black": "yes",
-            "use_ruff": "yes",
-            "use_pytest": "yes",
-            "use_pre_commit": "yes",
-            "python_version": "3.12",
-            "author": "Anonyme <anonyme@example.com>",
-            "_template": str(template_dir).replace(str(project_root), "<project_root>"),
-            "_output_dir": str(output_dir).replace(str(project_root), "<project_root>"),
-            "_repo_dir": str(repo_dir).replace(str(project_root), "<project_root>"),
-            "_checkout": None,
-        }
-    )
+erreurs = []
+if not IDENTIFIANT.match(PROJECT_SLUG):
+    erreurs.append(f"project_slug « {PROJECT_SLUG} » doit être un identifiant Python (minuscules, chiffres, _).")
+if not IDENTIFIANT.match(PACKAGE_NAME):
+    erreurs.append(f"package_name « {PACKAGE_NAME} » doit être un identifiant Python (minuscules, chiffres, _).")
+if not re.match(r"^3\.(1[0-9]|[2-9][0-9])$", PYTHON_VERSION):
+    erreurs.append(f"python_version « {PYTHON_VERSION} » : attendu 3.10 ou plus (ex. 3.12).")
 
-    # Éventuelles opérations supplémentaires sur le contexte
-    print(f"Contexte validé : {json.dumps(context, indent=4)}")
-
-
-if __name__ == "__main__":
-    main()
+if erreurs:
+    print("❌ Génération annulée :")
+    for e in erreurs:
+        print(f"   - {e}")
+    sys.exit(1)

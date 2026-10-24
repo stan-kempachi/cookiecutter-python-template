@@ -1,13 +1,27 @@
 {
   "project_name": "Mon super projet",
   "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
-  "package_name": "{{ cookiecutter.project_slug.replace('-', '_') }}",
+  "package_name": "{{ cookiecutter.project_slug }}",
   "framework": ["script", "flask", "django"],
-  "use_app_folder": ["yes", "no"],
+  "use_app_folder": ["no", "yes"],
+  "package_dir": "{% if cookiecutter.use_app_folder == 'yes' %}app{% else %}{{ cookiecutter.package_name }}{% endif %}",
   "use_black": ["yes", "no"],
   "use_ruff": ["yes", "no"],
   "use_pytest": ["yes", "no"],
   "use_pre_commit": ["yes", "no"],
+  "use_github_actions": ["yes", "no"],
   "python_version": "3.12",
-  "author": "Anonyme <anonyme@example.com>"
+  "author": "Anonyme <anonyme@example.com>",
+  "__prompts__": {
+    "project_name": "Nom du projet",
+    "framework": "Type de projet",
+    "use_app_folder": "Placer le code dans un dossier app/ plutôt que dans un package au nom du projet ?",
+    "use_black": "Formater avec black + isort ?",
+    "use_ruff": "Linter avec ruff ?",
+    "use_pytest": "Inclure pytest et un test d'exemple ?",
+    "use_pre_commit": "Inclure une configuration pre-commit ?",
+    "use_github_actions": "Inclure un workflow GitHub Actions (lint + tests) ?",
+    "python_version": "Version de Python minimale",
+    "author": "Auteur (Nom <email>)"
+  }
 }

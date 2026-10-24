@@ -1,145 +1,77 @@
-# Modèle Cookiecutter Python Template
+# cookiecutter-python-template
 
-## Description
-Ce projet offre une solution clé en main pour générer des templates Python modulaires adaptés à divers cas d'utilisation (scripts, Django, Flask, etc.) grâce à l'outil **Cookiecutter**. Ce modèle fournit une structure préconfigurée basée sur les bonnes pratiques en matière de développement, tests, intégration continue et personnalisation. La gestion des dépendances est simplifiée grâce à **Poetry**, garantissant un environnement robuste et moderne.
+[![CI](https://github.com/stan-kempachi/cookiecutter-python-template/actions/workflows/ci.yml/badge.svg)](https://github.com/stan-kempachi/cookiecutter-python-template/actions/workflows/ci.yml)
+![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)
+![Licence MIT](https://img.shields.io/badge/licence-MIT-green)
 
-## Fonctionnalités
-- Génération automatique et rapide de projets Python prêts à l'emploi.
-- Compatibilité avec plusieurs frameworks : script, Django, Flask, etc.
-- Prise en charge native de **GitLab CI/CD** via `.gitlab-ci.yml`.
-- Validation du code et gestion des hooks grâce à **Husky** et **commitlint**.
-- Structure personnalisable via `cookiecutter.json`.
-- Scripts d'exécution avant/après génération grâce à `pre_gen_project.py` et `post_gen_project.py`.
-
-## Structure générée
-Voici un exemple de structure générée avec ce template :
-
-```text
-.
-├── .gitlab-ci.yml           # Configuration CI/CD pour GitLab
-├── .husky/                  # Répertoire pour les hooks Git via Husky
-│   ├── pre-commit           # Hook activé avant chaque commit
-│   ├── commit-msg           # Validation des messages de commit
-├── .pre-commit-config.yaml  # Configuration des hooks pre-commit (pré-existant)
-├── cookiecutter.json        # Fichier de personnalisation pour le template
-├── pre_gen_project.py       # Script exécuté avant la génération
-├── post_gen_project.py      # Script exécuté après la génération
-├── src/                     # Dossier contenant le code principal
-│   ├── __init__.py
-│   ├── main.py              # Exemple de script principal
-├── tests/                   # Dossier pour les tests unitaires
-│   ├── __init__.py
-│   ├── test_main.py         # Tests avec pytest
-├── pyproject.toml           # Gestion des dépendances avec Poetry
-├── poetry.lock              # Verrouillage des dépendances généré par Poetry
-├── README.md                # Documentation du projet
-└── LICENSE                  # Licence du projet
-```
-
-## Installation
-
-### Prérequis
-1. Installer **Python 3.7+**.
-2. Installer **Cookiecutter** via pip :
-   ```bash
-   pip install cookiecutter
-   ```
-3. Installer **Poetry** :
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
-4. Installer **Node.js** (requis pour Husky et commitlint).
-5. Installer **Husky** et initialiser les hooks Git :
-   ```bash
-   npm exec husky-init && npm install
-   ```
-
-### Création d’un projet
-Pour générer un nouveau projet, utilisez Cookiecutter :
-```bash
-cookiecutter https://github.com/stan-kempachi/cookiecutter-python-template.git
-```
-Suivez les instructions pour personnaliser votre projet.
+Template [Cookiecutter](https://cookiecutter.readthedocs.io/) pour démarrer un projet Python propre en une commande : Poetry, pre-commit, black/isort/ruff, pytest et un workflow GitHub Actions déjà en place. Trois variantes : script ou bibliothèque, application Flask, application Django.
 
 ## Utilisation
-1. Naviguez vers le répertoire généré.
-2. Installez les dépendances avec **Poetry** :
-   ```bash
-   poetry install
-   ```
-3. Lancez votre application :
-   ```bash
-   poetry run python src/main.py
-   ```
 
-## Développement
-
-### Préparation
-Pour configurer les hooks **Husky et pre-commit**, exécutez :
 ```bash
-pre-commit install
+pip install cookiecutter
+cookiecutter https://github.com/stan-kempachi/cookiecutter-python-template.git
 ```
 
-**Ajouter des hooks personnalisés :**
-- Exécuter les tests avant chaque commit :
-   ```bash
-   npx husky add .husky/pre-commit "npm test"
-   ```
-- Vérification des messages commit avec commitlint :
-   ```bash
-   npx husky add .husky/commit-msg "npx --no-install commitlint --edit $1"
-   ```
+Puis, dans le projet généré :
 
-Ces hooks permettent de garantir des commits validés et un workflow standardisé.
-
-### Audit de sécurité avec npm (nouvelle section)
-Pour garantir la sécurité des dépendances, utilisez **npm audit** pour identifier les vulnérabilités :
 ```bash
-npm audit
-npm audit fix
+git init && poetry install
+poetry run pre-commit install
+poetry run python -m <package>.main        # script
+poetry run flask --app <package>.main run  # flask
+poetry run django-admin startproject config . && poetry run python manage.py runserver  # django
 ```
-Exécutez périodiquement ces commandes pour repérer et résoudre les problèmes potentiels.
 
-### Gestion des dépendances
-- Ajouter une dépendance principale :
-   ```bash
-   poetry add <nom-du-paquet>
-   ```
-- Ajouter une dépendance de développement uniquement :
-   ```bash
-   poetry add --dev <nom-du-paquet>
-   ```
+Génération non interactive :
 
-### Tests unitaires
-Exécuter les tests :
 ```bash
-poetry run pytest
+cookiecutter gh:stan-kempachi/cookiecutter-python-template --no-input project_name="Mon API" framework=flask
 ```
-Assurez-vous que tous les tests passent avant tout déploiement.
 
-### Bonnes pratiques
-- Respectez les conventions **PEP 8**.
-- Ajoutez des tests pour toute nouvelle fonctionnalité.
-- Mettez à jour la documentation en cas de modification importante.
+## Options
 
-## Intégration CI/CD
-Ce template inclut un fichier `.gitlab-ci.yml` qui configure automatiquement les pipelines pour GitLab CI/CD :
-- **Linting** : Pour vérifier la qualité du code.
-- **Tests unitaires** : Exécution des tests automatisés avec **pytest**.
-- **Déploiement** : Ajoutez une configuration personnalisée pour vos besoins.
+| Variable | Valeurs | Effet |
+|---|---|---|
+| `project_name` | texte | Nom affiché ; `project_slug` et `package_name` en sont dérivés |
+| `framework` | `script` (défaut), `flask`, `django` | Dépendance ajoutée, `main.py` et README adaptés |
+| `use_app_folder` | `no` (défaut), `yes` | Code dans `app/` plutôt que dans `<package_name>/` |
+| `use_black` | `yes` / `no` | black + isort (dépendances, config, hooks, CI) |
+| `use_ruff` | `yes` / `no` | ruff (dépendance, config, hook, CI) |
+| `use_pytest` | `yes` / `no` | pytest + dossier `tests/` avec un test d'exemple |
+| `use_pre_commit` | `yes` / `no` | `.pre-commit-config.yaml` |
+| `use_github_actions` | `yes` / `no` | `.github/workflows/ci.yml` (lint + tests) |
+| `python_version` | `3.12` | Version minimale (`^3.12` dans Poetry, cibles black/ruff) |
+| `author` | `Nom <email>` | Champ `authors` du `pyproject.toml` |
 
-Pour activer la CI/CD, créez un dépôt GitLab et effectuez un **commit** initial.
+Les hooks valident les réponses (`project_slug` et `package_name` doivent être des identifiants Python) et retirent du projet généré tout ce qui n'a pas été demandé.
 
-## Personnalisation
-Adaptez `cookiecutter.json` pour ajuster le modèle à vos besoins spécifiques. Exemple :
+## Projet généré
 
-```json
-{
-  "project_name": "Mon Projet",
-  "author_name": "Votre Nom",
-  "framework": ["Script", "django", "flask"]
-}
 ```
+mon_super_projet/
+├── .github/workflows/ci.yml   lint + tests sur GitHub Actions
+├── .gitignore
+├── .pre-commit-config.yaml    pre-commit-hooks, black, isort, ruff
+├── README.md                  commandes de démarrage adaptées au framework
+├── pyproject.toml             Poetry + config black / isort / ruff / pytest
+├── mon_super_projet/          (ou app/ avec use_app_folder=yes)
+│   ├── __init__.py
+│   └── main.py
+└── tests/
+    └── test_main.py
+```
+
+## Développer le template
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q                                   # génération dans un dossier temporaire, options, frameworks, exécution du projet généré
+ruff check hooks tests && ruff format --check hooks tests
+```
+
+La CI du template régénère un projet pour chaque framework et vérifie qu'il passe `poetry check`.
 
 ## Licence
-Ce projet est distribué sous la licence [MIT](LICENSE).
+
+[MIT](LICENSE).

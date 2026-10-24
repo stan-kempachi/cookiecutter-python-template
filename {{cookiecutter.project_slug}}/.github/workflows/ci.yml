@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "{{ cookiecutter.python_version }}"
+      - run: pipx install poetry
+      - run: poetry install --no-interaction
+{%- if cookiecutter.use_black == "yes" %}
+      - run: poetry run black --check .
+      - run: poetry run isort --check-only .
+{%- endif %}
+{%- if cookiecutter.use_ruff == "yes" %}
+      - run: poetry run ruff check .
+{%- endif %}
+{%- if cookiecutter.use_pytest == "yes" %}
+      - run: poetry run pytest -q
+{%- endif %}

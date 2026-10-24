@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "{{ cookiecutter.project_slug }}"
+version = "0.1.0"
+description = "{{ cookiecutter.project_name }}"
+authors = ["{{ cookiecutter.author }}"]
+readme = "README.md"
+packages = [{ include = "{{ cookiecutter.package_dir }}" }]
+
+[tool.poetry.dependencies]
+python = "^{{ cookiecutter.python_version }}"
+{%- if cookiecutter.framework == "flask" %}
+flask = "^3.0"
+{%- elif cookiecutter.framework == "django" %}
+django = "^5.1"
+{%- endif %}
+
+[tool.poetry.group.dev.dependencies]
+{%- if cookiecutter.use_black == "yes" %}
+black = "*"
+isort = "*"
+{%- endif %}
+{%- if cookiecutter.use_ruff == "yes" %}
+ruff = "*"
+{%- endif %}
+{%- if cookiecutter.use_pytest == "yes" %}
+pytest = "*"
+{%- endif %}
+{%- if cookiecutter.use_pre_commit == "yes" %}
+pre-commit = "*"
+{%- endif %}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+{%- if cookiecutter.use_black == "yes" %}
+
+[tool.black]
+line-length = 100
+target-version = ["py{{ cookiecutter.python_version.replace('.', '') }}"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+{%- endif %}
+{%- if cookiecutter.use_ruff == "yes" %}
+
+[tool.ruff]
+line-length = 100
+target-version = "py{{ cookiecutter.python_version.replace('.', '') }}"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+{%- endif %}
+{%- if cookiecutter.use_pytest == "yes" %}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+{%- endif %}

@@ -1,3 +1,5 @@
-# Simple, mais suffisant pour valider la CI.
-def test_addition():
-    assert 2 + 2 == 4
+from {{ cookiecutter.package_dir }} import __version__
+
+
+def test_version():
+    assert __version__ == "0.1.0"

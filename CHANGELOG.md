@@ -1,13 +1,15 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+## 2.0.0 (2026-10-25)
 
-### [1.0.3](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.0.2...v1.0.3) (2025-08-29)
+### Refonte
 
-### [1.0.2](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.0.1...v1.0.2) (2025-08-29)
+- CI GitHub Actions pour le template et pour les projets générés (fin de GitLab CI, Husky et standard-version)
+- hooks réécrits : validation des réponses, suppression réelle des options non retenues
+- `use_app_folder` produit un seul dossier de code (`app/` ou le nom du package), plus les deux
+- projet généré : `pyproject.toml` configuré (black/isort/ruff/pytest), README et `main.py` adaptés au framework, `.gitignore`
+- tests du template : options, frameworks, slug invalide, exécution réelle du projet généré
 
-### [1.0.1](https://gitlab.com/adm.standev/cookiecutter-python-template/compare/v1.0.0...v1.0.1) (2025-08-24)
+## 1.0.3 (2025-08-29) · 1.0.2 (2025-08-29) · 1.0.1 (2025-08-24)
 
-# Changelog
-
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+Versions initiales, publiées depuis GitLab avec standard-version.
